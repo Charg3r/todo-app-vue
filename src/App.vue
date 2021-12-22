@@ -45,7 +45,7 @@
     </v-navigation-drawer>
 
     <v-app-bar
-      color="blue"
+      color="indigo"
       app
       dark 
     >
