@@ -26,9 +26,9 @@
           height="200"
         />
       </v-col>
-      <v-col col="12" class="mt-12">
-        <h1> App developed with Vue + Vuetify + Laravel </h1>
-        <p> <a href="https://github.com/Charg3r" target="_blank"> @Charg3r </a></p>
+      <v-col col="12" class="ma-12">
+        <h1 class="ma-6"> App developed with Vue + Vuetify + Laravel </h1>
+        <p class="ma-6"> <a href="https://github.com/Charg3r" target="_blank"> @Charg3r </a></p>
       </v-col>
     </v-row>
   </v-container>
