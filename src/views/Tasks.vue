@@ -21,7 +21,8 @@
             </v-col>
             <v-col md="4" class="hidden-sm-and-down">
               <v-list-item-title class="pb-2"> Assigned to: </v-list-item-title>
-              <v-list-item-subtitle> {{ task.assigned_to }} </v-list-item-subtitle>
+              <v-list-item-subtitle v-if="task.username != null"> {{ task.username }} </v-list-item-subtitle>
+              <v-list-item-subtitle v-else> - </v-list-item-subtitle>
             </v-col>
             <v-col md="2" sm="4" class="hidden-xs-only">
               <div class="d-flex">
@@ -32,7 +33,7 @@
                   mdi-tag
                 </v-icon>
               <v-list-item-title v-if="task.tag != null" class="pb-2"> {{ task.tag }} </v-list-item-title>
-              <v-list-item-title v-else class="pb-2"> No tag </v-list-item-title>
+              <v-list-item-title v-else class="pb-2"> - </v-list-item-title>
               </div>
               <div class="d-flex">
                 <v-icon
@@ -41,7 +42,8 @@
                 >
                   mdi-calendar
                 </v-icon>
-                <v-list-item-subtitle> {{ task.formattedDate }} </v-list-item-subtitle>
+                <v-list-item-subtitle v-if="task.due_date != null"> {{ task.formattedDate }} </v-list-item-subtitle>
+                <v-list-item-subtitle v-else> - </v-list-item-subtitle>
               </div>
             </v-col>
             <v-col cols="1">
@@ -110,7 +112,13 @@ export default {
         .then((response) => {
           this.tasks = response.data
           this.tasks.forEach(task => {
-            if ("task.due" != null) {
+            // Get the name of our users
+            if (task.user_id != null) {
+              let username = this.$store.state.users.find(user => user.id == task.user_id)
+              task.username = username.name
+            }
+            // Format the date
+            if (task.due_date != null) {
               task.formattedDate = task.due_date
               task.formattedDate = task.due_date.substr(8,2) + '/' + task.due_date.substr(5,2) + '/' + task.due_date.substr(0,4)
             }
@@ -120,6 +128,7 @@ export default {
 	        console.log(error.response.data)
       })
     },
+    // Method that executes a method on child component "EditTask"
     showDialog(task) {
       this.$refs.editTask.showDialog(task)
     },
@@ -127,14 +136,14 @@ export default {
     deleteTask(task, index) {
       axios.delete('http://127.0.0.1:8000/api/task/' + task.id)
         .then((response) => {
-          console.log(response)
+          // Delete the task from local array
           this.tasks.splice(index, 1)
         })
         .catch(function (error) {
 	        console.log(error.response.data)
       })
     },
-    // Method that makes an API call to quickly update completion status.
+    // Method that makes an API call to quickly update completion status of a task.
     toggleComplete(id) {
       let localTask = this.tasks.filter(tasks => tasks.id === id)
       localTask.completed = !localTask.completed
@@ -146,9 +155,18 @@ export default {
     },
     // Method that adds a new task to beginning of the tasks array.
     addTask (newTask) {
-      newTask.formattedDate = newTask.due_date.substr(8,2) + '/' + newTask.due_date.substr(5,2) + '/' + newTask.due_date.substr(0,4)
+      // Assigned_to
+      if (newTask.user_id != null) {
+        let username = this.$store.state.users.find(user => user.id == newTask.user_id)
+        newTask.username = username.name
+      }
+      // Date format DD/MM/YYYY
+      if (newTask.due_date != null)
+        newTask.formattedDate = newTask.due_date.substr(8,2) + '/' + newTask.due_date.substr(5,2) + '/' + newTask.due_date.substr(0,4)
+      
       this.tasks.splice(0,0,newTask)
     },
+    // Method that edits local task array to update an edited task
     editTask (editedTask) {
       let index = this.tasks.findIndex(task => task.id === editedTask.id)
       this.tasks[index].name = editedTask.name

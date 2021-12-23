@@ -61,7 +61,7 @@
                       ></v-text-field>
                     </template>
                     <v-date-picker
-                      v-model="editedTask.formattedDate"
+                      v-model="editedTask.due_date"
                       no-title
                       scrollable
                       >
@@ -76,7 +76,7 @@
                       <v-btn
                           text
                           color="primary"
-                          @click="$refs.menu.save(editedTask.formattedDate)"
+                          @click="$refs.menu.save(editedTask.due_date)"
                       >
                           OK
                       </v-btn>
@@ -131,7 +131,13 @@
 import axios from 'axios'
 
 export default {
-  props: ['openDialog'],
+  computed: {
+    users: {
+      get() {
+        return this.$store.state.users
+      }
+    }
+  },
   data () {
     return {
         dialog: false,

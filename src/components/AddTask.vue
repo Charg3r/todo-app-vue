@@ -102,9 +102,11 @@
                   sm="6"
                 >
                   <v-select
-                    :items="['Carlos Olivas', 'John Doe', 'Will Smith', 'Luis Miguel']"
+                    :items="users"
+                    item-value="id"
+                    item-text="name"
                     prepend-icon="mdi-account"
-                    v-model="newTask.assigned_to"
+                    v-model="newTask.user_id"
                     label="Assigned to"
                   ></v-select>
                 </v-col>
@@ -145,6 +147,13 @@
 import axios from 'axios'
 
 export default {
+  computed: {
+    users: {
+      get() {
+        return this.$store.state.users
+      }
+    }
+  },
   data () {
     return {
         dialog: false,
@@ -164,12 +173,12 @@ export default {
       axios.post('http://127.0.0.1:8000/api/task/store', {
         task:{
           name: this.newTask.name,
-          description: this.newTask.description,
-          tag: this.newTask.tag,
-          due_date: this.newTask.due_date
+          description: this.newTask.description == null ? "" : this.newTask.description,
+          tag: this.newTask.tag == null ? "" : this.newTask.tag,
+          user_id: this.newTask.user_id == null ? "" : this.newTask.user_id,
+          due_date: this.newTask.due_date == null ? "" : this.newTask.due_date
         }
       }).then((response) => {
-        console.log(response)
         this.$emit('add-task', this.newTask)
         this.dialog = false
       })
