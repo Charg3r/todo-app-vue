@@ -66,12 +66,12 @@
                   >
                     <template v-slot:activator="{ on, attrs }">
                       <v-text-field
-                          v-model="newTask.due_date"
-                          label="Due date"
-                          prepend-icon="mdi-calendar"
-                          readonly
-                          v-bind="attrs"
-                          v-on="on"
+                        v-model="newTask.due_date"
+                        label="Due date"
+                        prepend-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
                       ></v-text-field>
                     </template>
                     <v-date-picker
@@ -81,18 +81,18 @@
                       >
                       <v-spacer></v-spacer>
                       <v-btn
-                          text
-                          color="indigo"
-                          @click="menu = false"
+                        text
+                        color="indigo"
+                        @click="menu = false"
                       >
                           Cancel
                       </v-btn>
                       <v-btn
-                          text
-                          color="primary"
-                          @click="$refs.menu.save(newTask.due_date)"
+                        text
+                        color="primary"
+                        @click="$refs.menu.save(newTask.due_date)"
                       >
-                          OK
+                        OK
                       </v-btn>
                     </v-date-picker>
                   </v-menu>
@@ -122,7 +122,9 @@
           </v-container>
         </v-card-text>
         <v-card-actions>
+
           <v-spacer></v-spacer>
+
           <v-btn
             color="blue darken-1"
             text
@@ -144,18 +146,11 @@
 </template>
 
 <script>
-import axios from 'axios'
+  import axios from 'axios'
 
-export default {
-  computed: {
-    users: {
-      get() {
-        return this.$store.state.users
-      }
-    }
-  },
-  data () {
-    return {
+  export default {
+    data () {
+      return {
         dialog: false,
         menu: false,
         valid: true,
@@ -166,28 +161,37 @@ export default {
           v => /.+@.+\..+/.test(v) || 'Description must be less than 500 characters',
         ],
         newTask: []
-    }
-  },
-  methods: {
-    createTask() {
-      axios.post('http://127.0.0.1:8000/api/task/store', {
-        task:{
-          name: this.newTask.name,
-          description: this.newTask.description == null ? "" : this.newTask.description,
-          tag: this.newTask.tag == null ? "" : this.newTask.tag,
-          user_id: this.newTask.user_id == null ? "" : this.newTask.user_id,
-          due_date: this.newTask.due_date == null ? "" : this.newTask.due_date
+      }
+    },
+    computed: {
+      users: {
+        get() { // Get all stored users
+          return this.$store.state.users
         }
-      }).then((response) => {
-        this.$emit('add-task', this.newTask)
-        this.dialog = false
-      })
-      .catch(function (error) {
-        console.log(error.response.data)
-      })
+      }
+    },
+    methods: {
+      // Method that makes an API call that stores a new task.
+      createTask() {
+        axios.post('http://127.0.0.1:8000/api/task/store', {
+          task:{
+            name: this.newTask.name,
+            description: !this.newTask.description ? "" : this.newTask.description,
+            tag: !this.newTask.tag ? "" : this.newTask.tag,
+            user_id: !this.newTask.user_id  ? "" : this.newTask.user_id,
+            due_date: !this.newTask.due_date  ? "" : this.newTask.due_date
+          }
+        }).then((response) => {
+          this.newTask = response.data
+          this.$emit('add-task', this.newTask)
+          this.dialog = false
+        })
+        .catch(function (error) {
+          console.log(error.response.data)
+        })
+      }
     }
   }
-}
 </script>
 
 <style>

@@ -40,7 +40,7 @@
                 <v-col
                   cols="12"
                   sm="6"
-                  >
+                >
                   <v-menu
                     ref="menu"
                     v-model="menu"
@@ -52,12 +52,12 @@
                   >
                     <template v-slot:activator="{ on, attrs }">
                       <v-text-field
-                          v-model="editedTask.due_date"
-                          label="Due date"
-                          prepend-icon="mdi-calendar"
-                          readonly
-                          v-bind="attrs"
-                          v-on="on"
+                        v-model="editedTask.due_date"
+                        label="Due date"
+                        prepend-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
                       ></v-text-field>
                     </template>
                     <v-date-picker
@@ -88,9 +88,11 @@
                   sm="6"
                 >
                   <v-select
-                    :items="['Carlos Olivas', 'John Doe', 'Will Smith', 'Luis Miguel']"
+                    :items="users"
+                    item-value="id"
+                    item-text="name"
                     prepend-icon="mdi-account"
-                    v-model="editedTask.assigned_to"
+                    v-model="editedTask.user_id"
                     label="Assigned to"
                   ></v-select>
                 </v-col>
@@ -106,7 +108,9 @@
           </v-container>
         </v-card-text>
         <v-card-actions>
+
           <v-spacer></v-spacer>
+
           <v-btn
             color="blue darken-1"
             text
@@ -119,7 +123,7 @@
             text
             @click="editTask"
           >
-            Edit
+            Save
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -128,18 +132,11 @@
 </template>
 
 <script>
-import axios from 'axios'
+  import axios from 'axios'
 
-export default {
-  computed: {
-    users: {
-      get() {
-        return this.$store.state.users
-      }
-    }
-  },
-  data () {
-    return {
+  export default {
+    data () {
+      return {
         dialog: false,
         menu: false,
         valid: true,
@@ -150,30 +147,41 @@ export default {
         descriptionRules: [
           v => /.+@.+\..+/.test(v) || 'Description must be less than 500 characters',
         ]
-    }
-  },
-  methods: {
-    showDialog(task) {
-      this.editedTask = JSON.parse(JSON.stringify(task));
-      this.dialog = true
+      }
     },
-    editTask() {
-      axios.put('http://127.0.0.1:8000/api/task/' + this.editedTask.id, {
-        task:{
-          name: this.editedTask.name,
-          description: this.editedTask.description,
-          tag: this.editedTask.tag,
-          due_date: this.editedTask.due_date
+    computed: {
+      users: {
+        get() { // Get all stored users
+          return this.$store.state.users
         }
-      }).then((response) => {
-        console.log(response)
-        this.$emit('edit-task', this.editedTask)
-        this.dialog = false
-      })
-      .catch(function (error) {
-        console.log(error.response.data)
-      })
+      }
+    },
+    methods: {
+      // Method that can be triggered from parent component
+      showDialog(task) {
+        this.editedTask = JSON.parse(JSON.stringify(task)); // Deep copy of task to be edited
+        this.dialog = true
+      },
+      // Method that makes an API call to update the edited task
+      editTask() {
+        axios.put('http://127.0.0.1:8000/api/task/' + this.editedTask.id, {
+          task:{
+            name: this.editedTask.name,
+            description: !this.editedTask.description ? "" : this.editedTask.description,
+            tag: !this.editedTask.tag ? "" : this.editedTask.tag,
+            user_id: !this.editedTask.user_id  ? "" : this.editedTask.user_id,
+            due_date: !this.editedTask.due_date  ? "" : this.editedTask.due_date
+          }
+        }).then((response) => {
+          this.editedTask = response.data
+          console.log()
+          this.$emit('edit-task', this.editedTask)
+          this.dialog = false
+        })
+        .catch(function (error) {
+          console.log(error.response.data)
+        })
+      }
     }
   }
-}
 </script>

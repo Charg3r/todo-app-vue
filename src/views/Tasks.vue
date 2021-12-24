@@ -91,94 +91,91 @@
 </template>
 
 <script>
-import axios from 'axios'
-import AddTask from '../components/AddTask.vue'
-import EditTask from '../components/EditTask.vue'
+  import axios from 'axios'
+  import AddTask from '../components/AddTask.vue'
+  import EditTask from '../components/EditTask.vue'
 
-export default {
-  data () {
-    return {
-      tasks: []
-    }
-  },
-  components: {
-    AddTask,
-    EditTask
-  },
-  methods: {
-    // Method that makes an API call that returns all tasks.
-    getTasks() {
-      axios.get('http://127.0.0.1:8000/api/tasks')
-        .then((response) => {
-          this.tasks = response.data
-          this.tasks.forEach(task => {
-            // Get the name of our users
-            if (task.user_id != null) {
-              let username = this.$store.state.users.find(user => user.id == task.user_id)
-              task.username = username.name
-            }
-            // Format the date
-            if (task.due_date != null) {
-              task.formattedDate = task.due_date
-              task.formattedDate = task.due_date.substr(8,2) + '/' + task.due_date.substr(5,2) + '/' + task.due_date.substr(0,4)
-            }
-          })
-        })
-        .catch(function (error) {
-	        console.log(error.response.data)
-      })
-    },
-    // Method that executes a method on child component "EditTask"
-    showDialog(task) {
-      this.$refs.editTask.showDialog(task)
-    },
-    // Method that makes an API call that deletes a task.
-    deleteTask(task, index) {
-      axios.delete('http://127.0.0.1:8000/api/task/' + task.id)
-        .then((response) => {
-          // Delete the task from local array
-          this.tasks.splice(index, 1)
-        })
-        .catch(function (error) {
-	        console.log(error.response.data)
-      })
-    },
-    // Method that makes an API call to quickly update completion status of a task.
-    toggleComplete(id) {
-      let localTask = this.tasks.filter(tasks => tasks.id === id)
-      localTask.completed = !localTask.completed
-      axios.put('http://127.0.0.1:8000/api/task/status/' + id)
-        .catch(function (error) {
-	        console.log(error.response.data)
-      })
-      console.log(this.tasks)
-    },
-    // Method that adds a new task to beginning of the tasks array.
-    addTask (newTask) {
-      // Assigned_to
-      if (newTask.user_id != null) {
-        let username = this.$store.state.users.find(user => user.id == newTask.user_id)
-        newTask.username = username.name
+  export default {
+    data () {
+      return {
+        tasks: []
       }
-      // Date format DD/MM/YYYY
-      if (newTask.due_date != null)
-        newTask.formattedDate = newTask.due_date.substr(8,2) + '/' + newTask.due_date.substr(5,2) + '/' + newTask.due_date.substr(0,4)
-      
-      this.tasks.splice(0,0,newTask)
     },
-    // Method that edits local task array to update an edited task
-    editTask (editedTask) {
-      let index = this.tasks.findIndex(task => task.id === editedTask.id)
-      this.tasks[index].name = editedTask.name
-      this.tasks[index].tag = editedTask.tag
-      this.tasks[index].assigned_to = editedTask.assigned_to
-      this.tasks[index].description = editedTask.description
-      this.tasks[index].due_date = editedTask.due_date
-      this.tasks[index].formattedDate = editedTask.formattedDate
+    components: {
+      AddTask,
+      EditTask
+    },
+    methods: {
+      // Method that makes an API call that returns all tasks.
+      getTasks() {
+        axios.get('http://127.0.0.1:8000/api/tasks')
+          .then((response) => {
+            this.tasks = response.data
+            this.tasks.forEach(task => {
+              if (task.user_id != null) {  // Get the name of our users
+                let username = this.$store.state.users.find(user => user.id == task.user_id)
+                task.username = username.name
+              }
+              if (task.due_date != null) {  // Format the date
+                task.formattedDate = task.due_date
+                task.formattedDate = task.due_date.substr(8,2) + '/' + task.due_date.substr(5,2) + '/' + task.due_date.substr(0,4)
+              }
+            })
+          })
+          .catch(function (error) {
+            console.log(error.response.data)
+        })
+      },
+      // Method that executes a method on child component "EditTask"
+      showDialog(task) {
+        this.$refs.editTask.showDialog(task)
+      },
+      // Method that makes an API call that deletes a task.
+      deleteTask(task, index) {
+        axios.delete('http://127.0.0.1:8000/api/task/' + task.id)
+          .then((response) => {
+            this.tasks.splice(index, 1) // Delete the task from local array
+          })
+          .catch(function (error) {
+            console.log(error.response.data)
+        })
+      },
+      // Method that makes an API call to quickly update completion status of a task.
+      toggleComplete(id) {
+        let localTask = this.tasks.filter(tasks => tasks.id === id)
+        localTask.completed = !localTask.completed
+        axios.put('http://127.0.0.1:8000/api/task/status/' + id)
+          .catch(function (error) {
+            console.log(error.response.data)
+        })
+        console.log(this.tasks)
+      },
+      // Method that adds a new task to beginning of the tasks array to display it on the UI.
+      addTask (newTask) {
+        if (newTask.user_id != null) {  // Change user_id to user nickname to display it on the UI
+          let username = this.$store.state.users.find(user => user.id == newTask.user_id)
+          newTask.username = username.name
+        }
+        if (newTask.due_date != null)  // Date format DD/MM/YYYY
+          newTask.formattedDate = newTask.due_date.substr(8,2) + '/' + newTask.due_date.substr(5,2) + '/' + newTask.due_date.substr(0,4)
+        
+        this.tasks.splice(0, 0, newTask) // Add task at the beginning
+      },
+      // Method that edits local task array to update an edited task
+      editTask (editedTask) {
+        let index = this.tasks.findIndex(task => task.id === editedTask.id) // Find index of the edited task to change its state 
+        if (editedTask.user_id != null) {  // Change user_id to user nickname to display it on the UI
+          let username = this.$store.state.users.find(user => user.id == editedTask.user_id)
+          editedTask.username = username.name
+        }
+        if (editedTask.due_date != null)  // Date format DD/MM/YYYY
+          editedTask.formattedDate = editedTask.due_date.substr(8,2) + '/' + editedTask.due_date.substr(5,2) + '/' + editedTask.due_date.substr(0,4)
+        
+        this.tasks.splice(index, 1, editedTask) // Search and replace edited task
+      }
+    },
+    created () {
+      this.getTasks()
     }
-  },
-  created () {
-    this.getTasks()
   }
-}
 </script>

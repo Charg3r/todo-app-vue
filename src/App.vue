@@ -86,7 +86,6 @@
         </v-list>
       </v-menu>
     </v-app-bar>
-
     <v-main>
       <router-view></router-view>
     </v-main>
@@ -94,78 +93,83 @@
 </template>
 
 <script>
-import axios from 'axios'
+  import axios from 'axios'
 
-export default {
-  computed: {
-    loggedUser: {
-      get() {
-        return this.$store.state.user
+  export default {
+
+    data () {
+      return {
+        items: [
+          { 
+            title: 'Tasks', 
+            icon: 'mdi-check-bold',
+            to: '/'
+          },
+          { 
+            title: 'About', 
+            icon: 'mdi-help-box',
+            to: '/about'
+          },
+        ],
+        right: null,
+        drawer: null
       }
     },
-    users: {
-      get() {
-        return this.$store.state.users
-      }
-    }
-  },
-  data () {
-    return {
-      items: [
-        { 
-          title: 'Tasks', 
-          icon: 'mdi-check-bold',
-          to: '/'
-        },
-        { 
-          title: 'About', 
-          icon: 'mdi-help-box',
-          to: '/about'
-        },
-      ],
-      right: null,
-      drawer: null
-    }
-  },
-  methods: {
-    toggleDark() {
-      this.$vuetify.theme.dark == false ? this.$vuetify.theme.dark = true : this.$vuetify.theme.dark = false
-      localStorage.setItem("dark_theme", this.$vuetify.theme.dark.toString());
-    },
-    getUsers() {
-      axios.get('http://127.0.0.1:8000/api/users')
-      .then((response) => {
-        this.$store.state.users = response.data
-      })
-      .catch(function (error) {
-        console.log(error.response.data)
-      })
-    },
-    changeUser(user) {
-      axios.get('http://127.0.0.1:8000/api/user/' + user.id)
-      .then((response) => {
-        this.$store.state.user = response.data
-      })
-      .catch(function (error) {
-        console.log(error.response.data)
-      })
-    }
-  },
-  mounted() {
-    const darkMode = localStorage.getItem("dark_theme");
-    if (darkMode) {
-        if (darkMode === "true") {
-            this.$vuetify.theme.dark = true;
-        } else {
-            this.$vuetify.theme.dark = false;
+    computed: {
+      loggedUser: {
+        get() { // Return current logged User
+          return this.$store.state.user
         }
-    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        this.$vuetify.theme.dark = true;
+      },
+      users: {
+        get() { // Return all stored users
+          return this.$store.state.users
+        }
+      }
+    },
+    methods: {
+      // Method that toggles the current theme and stores it in local storage
+      toggleDark() {
+        this.$vuetify.theme.dark == false ? this.$vuetify.theme.dark = true : this.$vuetify.theme.dark = false
         localStorage.setItem("dark_theme", this.$vuetify.theme.dark.toString());
+      },
+      // Method that makes an API call and returns all users, to then store them in memory
+      getUsers() {
+        axios.get('http://127.0.0.1:8000/api/users')
+        .then((response) => {
+          this.$store.state.users = response.data // vuex store all users
+        })
+        .catch(function (error) {
+          console.log(error.response.data)
+        })
+      },
+        // Method that makes an API call and changes currently logged user, to then store it in memory
+      changeUser(user) {
+        axios.get('http://127.0.0.1:8000/api/user/' + user.id)
+        .then((response) => {
+          this.$store.state.user = response.data // vuex store logged user
+        })
+        .catch(function (error) {
+          console.log(error.response.data)
+        })
+      }
+    },
+    mounted() {
+      // This code checks in local storage to see if dark mode has been already enabled.
+      const darkMode = localStorage.getItem("dark_theme");
+      if (darkMode) {
+          if (darkMode === "true") {
+              this.$vuetify.theme.dark = true;
+          } else {
+              this.$vuetify.theme.dark = false;
+          }
+      } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          this.$vuetify.theme.dark = true;
+          localStorage.setItem("dark_theme", this.$vuetify.theme.dark.toString());
+      }
+    },
+    created() {
+      this.getUsers()
     }
-  },
-  created() {
-    this.getUsers()
   }
-}
 </script>
