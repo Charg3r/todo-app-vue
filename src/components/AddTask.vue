@@ -36,6 +36,7 @@
                 >
                   <v-text-field
                     label="Name"
+                    :rules="nameRules"
                     v-model="newTask.name"
                     prepend-icon="mdi-check-circle"
                     required
@@ -156,9 +157,6 @@
         valid: true,
         nameRules: [
           v => !!v || 'Name is required'
-        ],
-        descriptionRules: [
-          v => /.+@.+\..+/.test(v) || 'Description must be less than 500 characters',
         ],
         newTask: []
       }

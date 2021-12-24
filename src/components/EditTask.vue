@@ -22,6 +22,7 @@
                 >
                   <v-text-field
                     label="Name"
+                    :rules="nameRules"
                     v-model="editedTask.name"
                     prepend-icon="mdi-check-circle"
                     required
@@ -143,9 +144,6 @@
         editedTask: [],
         nameRules: [
           v => !!v || 'Name is required'
-        ],
-        descriptionRules: [
-          v => /.+@.+\..+/.test(v) || 'Description must be less than 500 characters',
         ]
       }
     },
@@ -161,6 +159,9 @@
       showDialog(task) {
         this.editedTask = JSON.parse(JSON.stringify(task)); // Deep copy of task to be edited
         this.dialog = true
+      },
+      showError() {
+         this.errorAlert = true
       },
       // Method that makes an API call to update the edited task
       editTask() {
@@ -185,3 +186,7 @@
     }
   }
 </script>
+
+<style>
+
+</style>
